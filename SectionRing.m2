@@ -404,7 +404,6 @@ sectionRing(Ideal, ZZ) := o -> (I, p) -> I.cache#(symbol sectionRing, p, o) ??= 
     M := trim image(N % sub(B, m)) -- ~10% of the remainder
     m |= gens M
 ///;
-error 0;
     s := symbol s;
     T := K(monoid[ s_0 .. s_(#degs - 1), Degrees => degs ]);
     T / ker map(R, T, L) -- 10%
