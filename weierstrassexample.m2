@@ -1,5 +1,5 @@
 restart
-path = prepend("/Users/John/Documents/GitHub/WeightedEmbeddings/code", path)
+path = prepend("/Users/John/Documents/GitHub/WeightedEmbeddings/", path)
 loadPackage("SectionRing")
 
 --- Lets compute examples of hyperelliptic and non-hyperelliptic plane curves, and choose a random point vs weierstrass points.
