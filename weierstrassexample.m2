@@ -7,7 +7,7 @@ loadPackage("SectionRing")
 
 -- In genus 3, nonhyperelliptic curves are exactly nonsingular quartics in P^2.
 
-k = ZZ/10000019 -- its important that this is a BIG enough prime so that the intersection factors....
+k = ZZ/32003 -- its important that this is a BIG enough prime so that the intersection factors....
 P2 = k[x,y,z]
 B = ideal (x,y,z)
 
@@ -30,6 +30,9 @@ R = quotient C;
 pt = promote(pt,R)
 J = apply(1 .. 2*g+2, l-> ideal sectionRing(pt, l, "ReduceDegrees" => true));
 apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
+res J#0
+stack {net ((0+1)*(flatten degrees ring J#0)), net betti res J#0}
+net betti res J#0
 
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
