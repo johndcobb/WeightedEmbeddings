@@ -321,7 +321,9 @@ sectionRing Ideal := o -> I -> (
 --
 degreesRing' = memoize((rk, degs) -> ZZ( monoid [ Variables => #degs, DegreeRank => rk, Degrees => degs ] ))
 exponents Matrix := m -> apply(numcols m, c -> first exponents m_(0,c))
+-- TODO: understand how this is related to local coordinates
 sections = (deg, I) -> I.cache.sections#deg ??= basis(deg, ideal I_0^deg : I^deg)
+-- not quite useful, but we have: S/(I:f) -> S/I -> S/(I+f)
 
 sectionRing CoherentSheaf      := o ->  L -> sectionRing(L, 1, o)
 sectionRing(CoherentSheaf, ZZ) := o -> (L, p) -> (
@@ -340,7 +342,7 @@ sectionRing(Ideal, ZZ) := o -> (I, p) -> I.cache#(symbol sectionRing, p, o) ??= 
     --I.cache.subalgebra ??= null;
 
     -- about 70% of the computation is finding the bound
-    bound := o.DegreeLimit ?? sectionRingBound I;
+    bound := o.DegreeLimit ?? max(p, sectionRingBound I);
     if debugLevel > 0 then printerr("computing sections up to degree ", bound);
 
     L := map(R^1, R^0, 0);
