@@ -17,18 +17,17 @@ C = ideal f
 
 --- check that C is smooth
 J = minors_1 jacobian C
-saturate(radical trim C+J, B) == (1) -- if smooth, then this is true
-
+assert(saturate(radical trim C+J, B) == 1) -- if smooth, then this is true
 
 -- For plane curves, the weierstrass points are given by the intersection of the curve with its Hessian. Generically, there shoud be 3(4-2)*4 = 24 points.
 v = matrix{{x,y,z}}; Hessian = diff(v ** transpose v, f)
 weierstrass = ideal(f, det(Hessian))
-pt = first decompose(weierstrass)
-euler(pt) == 1 -- this is a point, not a double point
+pt = trim first decompose(weierstrass)
+assert(euler pt == 1) -- this is a point, not a double point
 
 R = quotient C;
-pt = promote(pt,R)
-J = apply(1 .. 2*g+2, l-> ideal sectionRing(pt, l, "ReduceDegrees" => true));
+pt = trim promote(pt,R)
+J = apply(1 .. 2*g+2, l-> ideal sectionRing(pt, l, "ReduceDegrees" => true, DegreeLimit => 4*g+4));
 apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
 res J#0
 stack {net ((0+1)*(flatten degrees ring J#0)), net betti res J#0}
@@ -36,7 +35,7 @@ net betti res J#0
 
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
-J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true));
+J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 4*g+4));
 apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
 
 ------------ Now lets try a hyperelliptic curve.
