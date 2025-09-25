@@ -1,6 +1,6 @@
 restart
-path = prepend("/Users/John/Documents/GitHub/WeightedEmbeddings/", path)
 loadPackage("SectionRing")
+topLevelMode = Standard
 
 --- Lets compute examples of hyperelliptic and non-hyperelliptic plane curves, and choose a random point vs weierstrass points.
 -- Need to go to genus 3, since all genus 2 curves are hyperelliptic.
@@ -31,12 +31,30 @@ J = apply(1 .. 2*g+2, l-> ideal sectionRing(pt, l, "ReduceDegrees" => true, Degr
 apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
 res J#0
 stack {net ((0+1)*(flatten degrees ring J#0)), net betti res J#0}
-net betti res J#0
-
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
 J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 4*g+4));
-apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
+apply(#J, j -> stack {net ((flatten degrees ring J#j)), net betti res J#j})
+apply(#J, j -> regularity J#j)
+apply(#J, j -> sum flatten degrees ring J#j - numgens ring J#j)
+apply(#J, j -> regularity J#j - sum (flatten degrees ring J#j) + numgens ring J#j) --- this is some sort of weighted regularity
+peek (betti res J#0)
+regularity J#0
+
+--- Now, I'm going to try to use random degree d divisors D
+
+randpts = for i from 1 to 2*g+2 list (
+    while euler(randp = first decompose ideal random(1, R)) != 1 do ();
+    randp
+) 
+D = d -> product randpts_{0..d-1}
+
+euler(D(2))
+
+sectionRing(D(2),"ReduceDegrees" => true, DegreeLimit => 40)
+
+J = apply(1 .. 2*g+2, l-> ideal sectionRing(D(l), "ReduceDegrees" => true, DegreeLimit => 4*g+4)); -- this is too slow!
+
 
 ------------ Now lets try a hyperelliptic curve.
 
@@ -62,6 +80,22 @@ apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j}
 
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
-J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true));
-apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
+J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 27));
+apply(#J, j -> stack { print j;
+    net(regularity res J#j - sum (flatten degrees ring J#j) + numgens ring J#j + 1),
+    net ((j+1)*(flatten degrees ring J#j)), 
+    net betti res J#j}) 
+apply(#J, j -> (
+    print(j);
+    regularity res J#j - sum (flatten degrees ring J#j) + numgens ring J#j + 1)
+)
+j=0
+regularity res J#j - sum (flatten degrees ring J#j) + numgens ring J#j + 1
+ring J#0
+basis(7, quotient J#0)
+degrees basis(7, quotient J#0)
+degrees ring J#0
+J#6
 
+basis(14, quotient J#0)
+J#6

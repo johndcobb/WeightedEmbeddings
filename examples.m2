@@ -5,6 +5,7 @@ restart
 path = prepend("/Users/John/Documents/GitHub/WeightedEmbeddings/code", path)
 loadPackage("SectionRing")
 needsPackage "SpaceCurves"
+topLevelMode = Standard
  
  --random genus g curve
  g = 4
@@ -14,6 +15,7 @@ needsPackage "SpaceCurves"
  while euler(I = first decompose ideal random(1, R)) != 1 do ()
  J = apply(1 .. 2*g+2, l-> ideal sectionRing(I, l, DegreeLimit => 20, "ReduceDegrees" => true));
  apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
+ apply(#J, j -> regularity J#j - sum (flatten degrees ring J#j) + numgens ring J#j)
 
 -- mahrud: Can build up C from graded parts, but need to be doing it over the standard grading
 needsPackage "Complexes"
