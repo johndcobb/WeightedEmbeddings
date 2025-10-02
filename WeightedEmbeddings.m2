@@ -12,22 +12,31 @@
 *- 
 
 needsPackage "NormalToricVarieties"
+needsPackage "SectionRing"
 
+kk = ZZ/32003
+
+weightedRegularity = I -> regularity res I + 1 - sum flatten degrees ring I + numgens ring I
+
+-- TODO: use https://mathoverflow.net/questions/79546/can-any-smooth-hyperelliptic-curve-be-embedded-in-a-quadric-surface
+-- to embed in P1xP1 instead
 createHyperelliptic = method()
-createHyperelliptic(ZZ) := Ideal => g -> (
+createHyperelliptic ZZ := Ideal => g -> createHyperelliptic(kk, g)
+createHyperelliptic(Ring, ZZ) := Ideal => (kk, g) -> (
     degR := 2*g+2;
-    F := hirzebruchSurface(g+1);
+    F := hirzebruchSurface(g+1, CoefficientRing => kk);
     S := ring F;
-    B := ideal F;
 
-    -- Now the equation of a hyperelliptic curve can be written as y^2 = p(x), where p is a degree degR polynomial with 2g+2 roots (those are the branch points).
-    p := product(for i from 1 to degR list (S_0-random(1,20)*S_2)); -- this is a degR polynomial at 8 branch points x=1...8 , in the O_(P^1) factor;
+    -- Now the equation of a hyperelliptic curve can be written as y^2 = p(x),
+    -- where p is a degree degR polynomial with 2g+2 roots (those are the branch points).
+    -- p is a degR polynomial at 8 branch points x=1...8 , in the O_(P^1) factor;
+    p := product(for i from 1 to degR list (S_0 - random(1,20)*S_2));
 
     C := ideal(S_3^2 - S_1^2*p);
 
     --embed the Hirzebruch by the (1,1) divisor
     b := basis({1,1},S);
-    Y := toricProjectiveSpace (numColumns b - 1);
+    Y := toricProjectiveSpace(numColumns b - 1, CoefficientRing => kk);
     R := ring Y;
     B := ideal Y;
     f := map(S,R,b);
@@ -35,5 +44,27 @@ createHyperelliptic(ZZ) := Ideal => g -> (
     --If I is the ideal for a subvariety of the hirzebruch, this gives the ideal for the embedding
     --into the P^N
     C' := preimage (f,C);
-    C'
-)
+    C')
+
+end--
+restart
+needs "WeightedEmbeddings.m2"
+
+g = 4
+I0 = createHyperelliptic(ZZ/101, g)
+R0 = quotient I0
+
+while euler(randp = first decompose ideal random(1, R0)) != 1 do ()
+R = sectionRing(randp, 2*g+2, "ReduceDegrees" => true)
+
+while euler(randp = first decompose ideal random(1, R)) != 1 do ()
+limit = 2 * first max degrees sectionRing(randp, 1, "ReduceDegrees" => true) + 2
+
+elapsedTime J = apply(1 .. 2*g+2,
+    l -> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => limit));
+printWidth = 0
+apply(#J, j -> stack {
+	print j;
+	elapsedTime net weightedRegularity J#j,
+	net ((j+1)*(flatten degrees ring J#j)),
+	net betti res J#j})

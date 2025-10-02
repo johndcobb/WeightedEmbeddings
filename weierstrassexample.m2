@@ -60,35 +60,45 @@ J = apply(1 .. 2*g+2, l-> ideal sectionRing(D(l), "ReduceDegrees" => true, Degre
 
 use P2;
 
-f = 2*x^4*y + 3*x*z*y^3 + 5*x^4*z + x^3*z^2 + x^3*z*y + y^5 + z^4*y
+f = 2*x^4*y + 3*x*z*y^3 + 5*x^4*z + x^3*z^2 + x^3*z*y + y^5 + z^4*y -- genus 6
 g = floor((4*3)/2)
 C = ideal f
 
 --- check that C is smooth
-J = minors_1 jacobian C
-saturate(radical trim C+J, B) == (1) -- if smooth, then this is true
+jac = minors_1 jacobian C
+assert( saturate(radical trim C+jac, B) == 1) -- if smooth, then this is true
 
--- For plane curves, the weierstrass points are given by the intersection of the curve with its Hessian. Generically, there shoud be 3(6-2)*6 = 72 points.
+-- For plane curves, the weierstrass points are given by the intersection
+-- of the curve with its Hessian. Generically, there shoud be 3(6-2)*6 = 72 points.
 v = matrix{{x,y,z}}; Hessian = diff(v ** transpose v, f)
 weierstrass = ideal(f, det(Hessian))
 pt = first decompose weierstrass
 
 R = quotient C;
 pt = promote(pt,R)
-J = apply(1 .. 2*g+2, l-> ideal sectionRing(pt, l, "ReduceDegrees" => true));
-apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
+--J = apply(1 .. 2*g+2, l-> ideal sectionRing(pt, l, "ReduceDegrees" => true));
+--apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
 
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
-J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 27));
-apply(#J, j -> stack { print j;
-    net(regularity res J#j - sum (flatten degrees ring J#j) + numgens ring J#j + 1),
-    net ((j+1)*(flatten degrees ring J#j)), 
-    net betti res J#j}) 
-apply(#J, j -> (
-    print(j);
-    regularity res J#j - sum (flatten degrees ring J#j) + numgens ring J#j + 1)
-)
+elapsedTime J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 27));
+apply(10, j -> elapsedTime stack {
+	print j;
+	I := J#j;
+	R := ring I;
+	b := minimalBetti I;
+	net(regularity b - sum (flatten degrees R) + numgens R + 1),
+	net ((j+1)*(flatten degrees R)),
+	net b})
+
+allowableThreads = 7
+needs "threads.m2"
+T = schedule(() -> apply(6, async(i -> (res J#i; print i))))
+
+
+syz mingens J#5
+netList apply(12, i -> { i, runLengthEncode last degrees mingens J#i, runLengthEncode last degrees gens J#i })
+
 j=0
 regularity res J#j - sum (flatten degrees ring J#j) + numgens ring J#j + 1
 ring J#0

@@ -1711,7 +1711,6 @@ reflexifyModule(Module) := Module => o-> (M1) -> (
 	)
 );
 
-isReflexive = method(Options => {Strategy => NoStrategy, KnownDomain=>true});
 isReflexive Module := Boolean => { Strategy => NoStrategy, KnownDomain => true } >> o -> M1 -> (
 	g := reflexify(M1, ReturnMap => true, Strategy => o.Strategy, KnownDomain=>o.KnownDomain);
 	(-1 == dim coker g)
