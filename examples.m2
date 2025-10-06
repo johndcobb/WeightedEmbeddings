@@ -8,14 +8,15 @@ needsPackage "SpaceCurves"
 topLevelMode = Standard
  
  --random genus g curve
+ load("WeightedEmbeddings.m2")
  g = 4
  d = g+3
  C = curve(d,g)
  R = quotient ideal C;
  while euler(I = first decompose ideal random(1, R)) != 1 do ()
  J = apply(1 .. 2*g+2, l-> ideal sectionRing(I, l, DegreeLimit => 20, "ReduceDegrees" => true));
- apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
- apply(#J, j -> regularity J#j - sum (flatten degrees ring J#j) + numgens ring J#j)
+ B = apply(#J, j -> stack {net weightedRegularity J#j, net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
+ saveBetti(B, "randomgenus4curve.m2")
 
 -- mahrud: Can build up C from graded parts, but need to be doing it over the standard grading
 needsPackage "Complexes"
@@ -86,3 +87,24 @@ while euler(p = first decompose ideal random(1, R)) != 1 do ()
 g = genus C
 J = apply(1 .. 2*g+2, l-> ideal sectionRing(p, l, DegreeLimit => 20, "ReduceDegrees" => true));
 apply(J, j -> stack {net flatten degrees ring j, net betti res j}) -- this is really really slow?
+
+needs "WeightedEmbeddings.m2"
+
+g = 4
+I0 = createHyperelliptic(ZZ/101, g)
+R0 = quotient I0
+
+while euler(randp = first decompose ideal random(1, R0)) != 1 do ()
+R = sectionRing(randp, 2*g+2, "ReduceDegrees" => true)
+
+while euler(randp = first decompose ideal random(1, R)) != 1 do ()
+limit = 2 * first max degrees sectionRing(randp, 1, "ReduceDegrees" => true) + 2
+
+elapsedTime J = apply(1 .. 2*g+2,
+    l -> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => limit));
+printWidth = 0
+apply(#J, j -> stack {
+	print j;
+	elapsedTime net weightedRegularity J#j,
+	net ((j+1)*(flatten degrees ring J#j)),
+	net betti res J#j})

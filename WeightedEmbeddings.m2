@@ -46,25 +46,20 @@ createHyperelliptic(Ring, ZZ) := Ideal => (kk, g) -> (
     C' := preimage (f,C);
     C')
 
-end--
-restart
-needs "WeightedEmbeddings.m2"
+saveBetti = method()
+saveBetti(List, String, String) := () => (B, filename, pwd) -> (
+    (pwd | filename) << toExternalString(B) << close;
+)
+saveBetti(List,  String) := () => (B, filename) -> (
+    pwd := currentDirectory() | "cache/";
+    saveBetti(B, filename, pwd);
+)
 
-g = 4
-I0 = createHyperelliptic(ZZ/101, g)
-R0 = quotient I0
-
-while euler(randp = first decompose ideal random(1, R0)) != 1 do ()
-R = sectionRing(randp, 2*g+2, "ReduceDegrees" => true)
-
-while euler(randp = first decompose ideal random(1, R)) != 1 do ()
-limit = 2 * first max degrees sectionRing(randp, 1, "ReduceDegrees" => true) + 2
-
-elapsedTime J = apply(1 .. 2*g+2,
-    l -> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => limit));
-printWidth = 0
-apply(#J, j -> stack {
-	print j;
-	elapsedTime net weightedRegularity J#j,
-	net ((j+1)*(flatten degrees ring J#j)),
-	net betti res J#j})
+loadBetti = method()
+loadBetti(String, String) := List => (filename, pwd) -> (
+    value get (pwd | filename)
+)
+loadBetti(String) := List => filename -> (
+    pwd := currentDirectory() | "cache/";
+    loadBetti(filename, pwd)
+)
