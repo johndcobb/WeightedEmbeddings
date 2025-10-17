@@ -1,8 +1,9 @@
 restart
-loadPackage("SectionRing")
+load "WeightedEmbeddings.m2"
 topLevelMode = Standard
 
---- Lets compute examples of hyperelliptic and non-hyperelliptic plane curves, and choose a random point vs weierstrass points.
+--- Lets compute examples of hyperelliptic and non-hyperelliptic plane curves,
+-- and choose a random point vs weierstrass points.
 -- Need to go to genus 3, since all genus 2 curves are hyperelliptic.
 
 -- In genus 3, nonhyperelliptic curves are exactly nonsingular quartics in P^2.
@@ -32,6 +33,7 @@ apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j}
 res J#0
 stack {net ((0+1)*(flatten degrees ring J#0)), net betti res J#0}
 
+R = quotient C;
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
 J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 4*g+4));
 apply(#J, j -> stack {net ((flatten degrees ring J#j)), net betti res J#j})
@@ -56,9 +58,14 @@ sectionRing(D(2),"ReduceDegrees" => true, DegreeLimit => 40)
 J = apply(1 .. 2*g+2, l-> ideal sectionRing(D(l), "ReduceDegrees" => true, DegreeLimit => 4*g+4)); -- this is too slow!
 
 
------------- Now lets try a hyperelliptic curve.
+------------------------------------------------------------------------------
+restart
+load "WeightedEmbeddings.m2"
+topLevelMode = Standard
 
-use P2;
+k = ZZ/32003 -- its important that this is a BIG enough prime so that the intersection factors....
+P2 = k[x,y,z]
+B = ideal (x,y,z)
 
 f = 2*x^4*y + 3*x*z*y^3 + 5*x^4*z + x^3*z^2 + x^3*z*y + y^5 + z^4*y -- genus 6
 g = floor((4*3)/2)
@@ -73,16 +80,18 @@ assert( saturate(radical trim C+jac, B) == 1) -- if smooth, then this is true
 v = matrix{{x,y,z}}; Hessian = diff(v ** transpose v, f)
 weierstrass = ideal(f, det(Hessian))
 pt = first decompose weierstrass
+pt = (decompose weierstrass)#1
 
 R = quotient C;
 pt = promote(pt,R)
---J = apply(1 .. 2*g+2, l-> ideal sectionRing(pt, l, "ReduceDegrees" => true));
---apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
-
+errorDepth=1
+gbTrace = 0
+J = apply({1,2,3,4,5,6,7,8,9,10}, l -> elapsedTime ideal sectionRing(pt, l, "ReduceDegrees" => true, DegreeLimit => 27));
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
 elapsedTime J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 27));
-apply(10, j -> elapsedTime stack {
+elapsedTime J = apply({1,2,3,4,5,6,7,-*8*-9,10,11,12,13}, l -> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 27));
+apply(#J, j -> elapsedTime stack {
 	print j;
 	I := J#j;
 	R := ring I;
