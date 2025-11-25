@@ -28,13 +28,14 @@ assert(euler pt == 1) -- this is a point, not a double point
 R = quotient C;
 pt = trim promote(pt,R)
 J = apply(1 .. 2*g+2, l-> ideal sectionRing(pt, l, "ReduceDegrees" => true, DegreeLimit => 4*g+4));
-apply(#J, j -> stack {net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
-res J#0
-stack {net ((0+1)*(flatten degrees ring J#0)), net betti res J#0}
+B = apply(#J, j -> stack {net weightedRegularity J#j, net ((j+1)*(flatten degrees ring J#j)), net betti res J#j})
+saveBetti(B, "degree4genus3planeweierstrass.m2")
+
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
 J = apply(1 .. 2*g+2, l-> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 4*g+4));
-apply(#J, j -> stack {net ((flatten degrees ring J#j)), net betti res J#j})
+B = apply(#J, j -> stack {net weightedRegularity J#j, net ((flatten degrees ring J#j)), net betti res J#j})
+saveBetti(B, "degree4genus3planerandom.m2")
 apply(#J, j -> regularity J#j)
 apply(#J, j -> sum flatten degrees ring J#j - numgens ring J#j)
 apply(#J, j -> regularity J#j - sum (flatten degrees ring J#j) + numgens ring J#j) --- this is some sort of weighted regularity
