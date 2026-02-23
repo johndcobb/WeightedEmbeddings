@@ -75,6 +75,46 @@ loadBetti(String) := List => filename -> (
     loadBetti(filename, pwd)
 )
 
+-- Return a minimal additive generating subset of a given list of pairs {a,b}
+minimalAdditiveGeneratingSet = (L) -> (
+    L = unique L;
+
+    -- sort by (a+b), then a, then b
+    L = sort(L, u -> {u#0+u#1, u#0, u#1});
+
+    maxA := max apply(L, u -> u#0);
+    maxB := max apply(L, u -> u#1);
+
+    -- reachable = all sums of chosen generators, but only within the bounding box
+    reachable := new MutableHashTable;
+    reachable#{0,0} = true;
+
+    addGen := (g) -> (
+        a := g#0; b := g#1;
+        if (a==0 and b==0) then return;
+
+        keysList := keys reachable; -- snapshot
+        for p in keysList do (
+            x0 := p#0; y0 := p#1;
+            k := 1;
+            while (x0 + k*a <= maxA and y0 + k*b <= maxB) do (
+                reachable#{x0 + k*a, y0 + k*b} = true;
+                k = k+1;
+            );
+        );
+    );
+
+    G := {};
+    for v in L do (
+        if not (reachable#? v) then (
+            G = append(G, v);
+            addGen(v);
+        );
+    );
+
+    G
+);
+
 end--
 restart
 needs "WeightedEmbeddings.m2"
