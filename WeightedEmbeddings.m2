@@ -17,6 +17,9 @@ needsPackage "Depth"
 
 kk = ZZ/32003
 
+-- TODO: fix in Complexes, for modules too
+minimalBetti Ideal := BettiTally => opts -> I -> I.cache.minimalBetti ??= minimalBetti(comodule I, opts)
+
 weightedRegularity = I -> regularity minimalBetti I - (sum flatten degrees ring I - numgens ring I)
 
 -- FIXME: only correct for Cohen-Macaulay curves
@@ -28,8 +31,8 @@ koszulRegularity' = I -> (
     maxBeta := for i to pdim bt list max \\ last \ select(keys bt, (ind, deg, d) -> i == ind);
     max for i from 1 to pdim bt list maxBeta_i + 1 - wsup#(i+depthM) + wsup#(depthM-1))
 
--- TODO: use https://mathoverflow.net/questions/79546/can-any-smooth-hyperelliptic-curve-be-embedded-in-a-quadric-surface
--- to embed in P1xP1 instead
+-- TODO: in Weierstrass-PP3.m2 I do this with curves in P1xP1, should this be a separate function?
+-- I didn't do this yet because I needed some internal data to get the Weierstrass points
 createHyperelliptic = method()
 createHyperelliptic ZZ := Ideal => g -> createHyperelliptic(kk, g)
 createHyperelliptic(Ring, ZZ) := Ideal => (kk, g) -> (
@@ -119,7 +122,7 @@ end--
 restart
 needs "WeightedEmbeddings.m2"
 
-g = 4
+g = 3
 I0 = createHyperelliptic(ZZ/101, g)
 R0 = quotient I0
 

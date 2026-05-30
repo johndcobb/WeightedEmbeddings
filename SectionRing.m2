@@ -319,10 +319,15 @@ sectionRing Ideal := o -> I -> (
 )
 
 --
+
 degreesRing' = memoize((rk, degs) -> ZZ( monoid [ Variables => #degs, DegreeRank => rk, Degrees => degs ] ))
 exponents Matrix := m -> apply(numcols m, c -> first exponents m_(0,c))
+
+-- TODO: add to Saturation
+quotientd = (I, J, d) -> fold(quotient, I, d:J)
 -- TODO: understand how this is related to local coordinates
-sections = (deg, I) -> I.cache.sections#deg ??= basis(deg, ideal I_0^deg : I^deg)
+-- TODO: note that quotient isn't cached because ideal I_0^deg is a new ideal
+sections = (deg, I) -> I.cache.sections#deg ??= basis(deg, quotientd(ideal I_0^deg, I, deg))
 -- not quite useful, but we have: S/(I:f) -> S/I -> S/(I+f)
 
 sectionRing CoherentSheaf      := o ->  L -> sectionRing(L, 1, o)
@@ -364,6 +369,7 @@ sectionRing(Ideal, ZZ) := o -> (I, p) -> I.cache#(symbol sectionRing, p, o) ??= 
     if degreeLength R == 1 then degs = flatten degs;
     if debugLevel > 0 then printerr("found ", numcols L, " sections in degrees ", degs);
     if o#"ReduceDegrees" then degs = degs // gcd degs;
+    I.cache#("SectionMap", p) = L;
 
 ///
     L = module dual sheaf I

@@ -1,6 +1,6 @@
 needs "WeightedEmbeddings.m2"
 
-ayasDream = (degs, j) -> (
+mayasDream = (degs, j) -> (
     I := J#j;
     S' := ring I;
     "w-reg: " | elapsedTime net weightedRegularity I,
