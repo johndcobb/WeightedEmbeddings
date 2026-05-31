@@ -324,7 +324,7 @@ degreesRing' = memoize((rk, degs) -> ZZ( monoid [ Variables => #degs, DegreeRank
 exponents Matrix := m -> apply(numcols m, c -> first exponents m_(0,c))
 
 -- TODO: add to Saturation
-quotientd = (I, J, d) -> fold(quotient, I, d:J)
+quotientd = (I, J, d) -> fold((A,B) -> elapsedTime quotient(A, B), I, d:J)
 -- TODO: understand how this is related to local coordinates
 -- TODO: note that quotient isn't cached because ideal I_0^deg is a new ideal
 sections = (deg, I) -> I.cache.sections#deg ??= basis(deg, quotientd(ideal I_0^deg, I, deg))

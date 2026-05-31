@@ -37,6 +37,8 @@ pt = (decompose weierstrass)#1
 R = quotient C;
 pt = promote(pt,R)
 
+assert ( euler pt == 1 )
+
 errorDepth=1
 gbTrace = 0
 debugLevel=1
@@ -46,14 +48,18 @@ J = apply(1..2*g+1, l ->
 p2 = apply(J, async minimalBetti);
 netList toList p2
 
-apply(#J, j -> elapsedTime stack {
+<< horizontalJoin between_"  " apply(#J,
+    j -> elapsedTime stack {
 	print j;
 	I := J#j;
 	R := ring I;
+	if not isReady p2#j then return;
 	b := minimalBetti I;
-	net(regularity b - sum (flatten degrees R) + numgens R + 1),
-	net flatten degrees R,
-	net b})
+	concatenate("   p = ", toString(j+1)),
+	concatenate("wreg = ", toString(regularity b - sum (flatten degrees R) + numgens R + 1)),
+	concatenate("degs = ", toString runLengthEncode flatten degrees R),
+	net b}) << endl << flush
+
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()
 elapsedTime J = apply(1 .. 2*g+2, l -> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => 27));
@@ -103,3 +109,6 @@ R0 = R
 pt0 = pt
 R = quotient ker map(R0, S3, {S_0, S_1, S_2, S_0})
 pt = R ** ker map(R0/pt0, S3, {S_0, S_1, S_2, S_0})
+
+assert( genus R == 6 )
+assert( euler pt == 1 )

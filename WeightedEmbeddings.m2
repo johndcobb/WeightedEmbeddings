@@ -122,20 +122,26 @@ end--
 restart
 needs "WeightedEmbeddings.m2"
 
-g = 3
+g = 6
 I0 = createHyperelliptic(ZZ/101, g)
 R0 = quotient I0
 
+notify = true
+errorDepth=1
+debugLevel=1
 while euler(randp = first decompose ideal random(1, R0)) != 1 do ()
 R = sectionRing(randp, 2*g+2, "ReduceDegrees" => true)
+R = sectionRing(randp, 1, "ReduceDegrees" => true) -- get embedding in weighted projective plane
 
-while euler(randp = first decompose ideal random(1, R)) != 1 do ()
+C = Proj R
+
+while euler sheaf comodule(randp = first decompose ideal random(1, R)) != 1 do ()
 limit = 2 * first max degrees sectionRing(randp, 1, "ReduceDegrees" => true) + 2
 
 elapsedTime J = apply(1 .. 2*g+2,
     l -> ideal sectionRing(randp, l, "ReduceDegrees" => true, DegreeLimit => limit));
 printWidth = 0
-<< apply(#J, j -> stack {
+<< horizontalJoin between_"  " apply(#J, j -> stack {
 	print j;
 	I := J#j;
 	S' := ring I;
@@ -144,7 +150,7 @@ printWidth = 0
 	--"isCM:  " | net isCM quotient I,
 	net ((j+1)*(flatten degrees ring I)),
 	netList {
-	    minimalBetti (map(S', S', apply(gens S', g -> if degree g < {3} then 0 else g))) I,
+--	    minimalBetti (map(S', S', apply(gens S', g -> if degree g < {3} then 0 else g))) I,
 	    minimalBetti I}})
 
 I = J#7;
