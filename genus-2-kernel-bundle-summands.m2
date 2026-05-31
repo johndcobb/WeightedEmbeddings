@@ -1,6 +1,5 @@
 debug needsPackage "DirectSummands"
-needsPackage "SectionRing"
-needs "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 needs "threads.m2"
 --allowableThreads = 64
 notify = true

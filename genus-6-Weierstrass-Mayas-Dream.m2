@@ -1,4 +1,4 @@
-needs "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 
 mayasDream = (degs, j) -> (
     I := J#j;

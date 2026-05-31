@@ -1,4 +1,4 @@
-needs "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 
 g = 3
 kk = ZZ/11

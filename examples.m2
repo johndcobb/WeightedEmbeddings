@@ -88,7 +88,7 @@ g = genus C
 J = apply(1 .. 2*g+2, l-> ideal sectionRing(p, l, DegreeLimit => 20, "ReduceDegrees" => true));
 apply(J, j -> stack {net flatten degrees ring j, net betti res j}) -- this is really really slow?
 
-needs "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 
 g = 4
 I0 = createHyperelliptic(ZZ/101, g)
