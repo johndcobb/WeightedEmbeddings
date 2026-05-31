@@ -413,11 +413,12 @@ sectionRing(Ideal, ZZ) := o -> (I, p) -> I.cache#(symbol sectionRing, p, o) ??= 
     m |= gens M
 ///;
     s := symbol s;
+    r := gcd flatten degrees source L // gcd degs;
     T := K(monoid[ s_0 .. s_(#degs - 1), Degrees => degs ]);
-    T / ker map(R, T, L) -- 10%
+    T / ker map(R, T, L, DegreeMap => a -> r * a) -- 10%
 )
 
-sections' = (X, deg, I) -> X.cache.sections#(deg, I) ??= basis(deg, ideal I_0^deg : I^deg)
+sections' = (X, deg, I) -> X.cache.sections#(deg, I) ??= basis(deg, quotientd(ideal I_0^deg, I, deg))
 
 sectionRing(ProjectiveVariety, List, List) := o -> (X, II, pp) -> (
     R := ring X;
@@ -465,8 +466,9 @@ sectionRing(ProjectiveVariety, List, List) := o -> (X, II, pp) -> (
     
 
     s := symbol s;
+    r := gcd flatten degrees source L // gcd degs;
     T := K(monoid[ s_0 .. s_(#degs - 1), Degrees => degs ]);
-    T / ker map(R, T, L) -- 10%
+    T / ker map(R, T, L, DegreeMap => a -> r * a) -- 10%
 )
 
 -----------------------------------------------------------------------

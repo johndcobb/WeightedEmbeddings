@@ -49,22 +49,24 @@ while euler(randp = first decompose ideal random(1, R)) != 1 do ()
 
 end--
 restart
-g = 8
+g = 6
 load "Weierstrass-PP3.m2"
 
 -- pick one Weierstrass point
 gbTrace = 0
 debugLevel = 1
-J = apply({8}, l ->
+J = apply(1..g+2, l ->
     elapsedTime ideal sectionRing(pt, l, "ReduceDegrees" => true, DegreeLimit => 30));
 
+-- genus 8, l = 8 is missing in the table
 p2 = apply(J, async minimalBetti);
 netList toList p2
-(openOutAppend "genus-7-betti-tables.m2") << horizontalJoin between_"  " apply(#J,
+(openOutAppend "genus-6-betti-tables.m2") << horizontalJoin between_"  " apply(#J,
     j -> elapsedTime stack {
 	print j;
 	I := J#j;
 	R := ring I;
+	if not isReady p2#j then return;
 	b := minimalBetti I;
 	concatenate("   p = ", toString(j+1)),
 	concatenate("wreg = ", toString(regularity b - sum (flatten degrees R) + numgens R + 1)),
