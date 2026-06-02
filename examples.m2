@@ -8,7 +8,7 @@ needsPackage "SpaceCurves"
 topLevelMode = Standard
  
  --random genus g curve
- load("WeightedEmbeddings.m2")
+ needsPackage "WeightedEmbeddings"
  g = 4
  d = g+3
  C = curve(d,g)
@@ -45,7 +45,7 @@ apply(J, j -> flatten degrees ring j)
 
 -- I have made a function that will generate hyperelliptic curves of genus g based off of Jay's function. Its in WeightedEmbeddings.m2.
 restart
-load "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 g = 3
 C = createHyperelliptic(3)
 

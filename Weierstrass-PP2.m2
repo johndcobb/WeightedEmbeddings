@@ -1,5 +1,5 @@
 restart
-load "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 
 --- Lets compute examples of hyperelliptic and non-hyperelliptic plane curves,
 -- and choose a random point vs weierstrass points.

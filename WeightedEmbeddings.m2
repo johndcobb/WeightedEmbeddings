@@ -78,7 +78,6 @@ createHyperelliptic(Ring, ZZ) := Ideal => (kk, g) -> (
     -- this gives the ideal for the embedding into the P^N
     preimage (f, C))
 
-
 -- Return a minimal additive generating subset of a given list of pairs {a,b}
 minimalAdditiveGeneratingSet = (L) -> (
     L = unique L;
@@ -118,6 +117,37 @@ minimalAdditiveGeneratingSet = (L) -> (
 
     G)
 
+-- not quite ideal yet
+numericalSemigroupGenerators = hf -> (
+    -- numerical semigroup elements so far
+    SG := new MutableList;
+    SG#0 = true;
+    --
+    inSG := (n, G) -> SG#?n and SG#n === true or (
+	for i to n do (
+	    if SG#?i and SG#i === true then for g in G do (
+		if i+g <= n then SG#(i+g) = true;
+		);
+	    );
+	SG#?n and SG#n === true
+	);
+    -- numegrical semigroup generators
+    G := new MutableList;
+    mult := infinity;
+    streak := 0;
+    --
+    n := 0;
+    prev := hf n;
+    while streak < mult do (
+	n += 1;
+	cur := hf n;
+	jump := cur - prev;
+	if jump == 0 then streak = 0 else (
+	    mult = min(mult, n); -- FIXME: find this earlier?
+	    if not inSG(n, G) then G##G = n;
+	    streak = streak + 1);
+	prev = cur);
+    toList G)
 
 saveBetti = method()
 saveBetti(List, String, String) := () => (B, filename, pwd) -> (

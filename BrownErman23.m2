@@ -1,4 +1,4 @@
-load "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 topLevelMode = Standard
 
 -- From Brown--Erman (Linear Syzygies of Curves in Weighted Projective Space)

@@ -1,5 +1,5 @@
 needsPackage "NormalToricVarieties"
-load "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 
 --- Lets compute examples of space curves of genus g and choose weierstrass points.
 
@@ -41,26 +41,32 @@ assert( degree delta == {0, 2*g+2} )
 -- faster:
 pts = value \ toList factor delta -- the lift of the roots from P1 back to C are the Weierstrass points
 pts = select(pts, f -> degree f == {0,1}) -- depends on the field
-pt = ker map(R0/pts#0, S, {R0_1*R0_3, R0_0*R0_3, R0_1*R0_2, R0_0*R0_2}) -- ideal of a point in P1xP1 in P^3
-
-pt = promote(pt, R)
-
-while euler(randp = first decompose ideal random(1, R)) != 1 do ()
+assert( #pts > 0 ) -- if this fails, try a different field or curve!
 
 end--
 restart
-g = 6
+g = 7
 load "Weierstrass-PP3.m2"
 
 -- pick one Weierstrass point
+pt = radical ker map(R0/pts#0, R, {R0_1*R0_3, R0_0*R0_3, R0_1*R0_2, R0_0*R0_2}) -- ideal of a point in C in P1xP1 in P^3
+assert( euler pt == 1 )
+
+-- or run this and set pt = randp
+while euler(randp = radical first decompose ideal random(1, R)) != 1 do ()
+
+-- heuristic for a sufficient limit
 gbTrace = 0
 debugLevel = 1
-J = apply(1..g+2, l ->
-    elapsedTime ideal sectionRing(pt, l, "ReduceDegrees" => true, DegreeLimit => 30));
+limit = 2 * first max degrees sectionRing(pt, 1, "ReduceDegrees" => true) + 2
+
+J = apply(1..2*g+2, l ->
+    elapsedTime ideal sectionRing(pt, l, "ReduceDegrees" => true, DegreeLimit => limit));
 
 -- genus 8, l = 8 is missing in the table
 p2 = apply(J, async minimalBetti);
 netList toList p2
+
 (openOutAppend "genus-6-betti-tables.m2") << horizontalJoin between_"  " apply(#J,
     j -> elapsedTime stack {
 	print j;
@@ -71,8 +77,12 @@ netList toList p2
 	concatenate("   p = ", toString(j+1)),
 	concatenate("wreg = ", toString(regularity b - sum (flatten degrees R) + numgens R + 1)),
 	concatenate("degs = ", toString runLengthEncode flatten degrees R),
-	net b}) << endl << flush << close
+	net b}) << endl << flush
 
+
+R115 = quotient J#0
+apply(20, i -> hilbertFunction_i R115)
+netList apply(10, i -> basis_i R115)
 
 
 while euler(randp = first decompose ideal random(1, R)) != 1 do ()

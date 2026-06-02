@@ -1,4 +1,4 @@
-load "WeightedEmbeddings.m2"
+needsPackage "WeightedEmbeddings"
 topLevelMode = Standard
 --- here is a random genus 4 degree 7 curve in P^4
 B = loadBetti("randomgenus4curve.m2")
