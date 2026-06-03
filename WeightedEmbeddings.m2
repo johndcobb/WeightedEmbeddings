@@ -8,7 +8,7 @@ newPackage(
 	{ Name => "John Cobb",      Email => "john.cobb@auburn.edu", HomePage => "https://johndcobb.github.io"},
 	{ Name => "Mahrud Sayrafi", Email => "mahrud@mcmaster.ca",   HomePage => "https://mahrud.github.io" }
 	},
-    PackageExports => { "SectionRing", "NormalToricVarieties" },
+    PackageExports => { "SectionRing", "NumericalSemigroups", "NormalToricVarieties" },
     Keywords => { "Commutative Algebra", "Algebraic Geometry" },
     DebuggingMode => true
     )
@@ -16,6 +16,7 @@ newPackage(
 export {
     "createHyperelliptic",
     "minimalAdditiveGeneratingSet",
+    "numericalSemigroupGenerators",
     "weightedRegularity",
     "koszulRegularity'",
     }
@@ -142,10 +143,12 @@ numericalSemigroupGenerators = hf -> (
 	n += 1;
 	cur := hf n;
 	jump := cur - prev;
-	if jump == 0 then streak = 0 else (
+	if jump == 0 then streak = 0 else
+	if jump == 1 then (
 	    mult = min(mult, n); -- FIXME: find this earlier?
 	    if not inSG(n, G) then G##G = n;
-	    streak = streak + 1);
+	    streak = streak + 1)
+	else error "expected jumps of at most 1";
 	prev = cur);
     toList G)
 

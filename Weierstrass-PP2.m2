@@ -1,4 +1,3 @@
-restart
 needsPackage "WeightedEmbeddings"
 
 --- Lets compute examples of hyperelliptic and non-hyperelliptic plane curves,
@@ -39,11 +38,36 @@ pt = promote(pt,R)
 
 assert ( euler pt == 1 )
 
+-- do a change of coordinates to make the computation easier!
+phi = map(S, S, vars S * inverse lift((gens pt | mingens ideal(vars R % pt)) // vars R, kk))
+assert( phi lift(gens pt, S) == (vars S)_{0,1} )
+R = quotient phi ideal R
+pt = R ** ideal phi lift(gens pt, S)
+
+psi = icMap R
+R = target psi
+S = ambient R
+pt = psi pt
+
+end--
+restart
+needs "Weierstrass-PP2.m2"
+
+limit = l -> if l >= 2*g+1 then l else l * ceiling((2*g+1) / l + 2)
+
 errorDepth=1
 gbTrace = 0
 debugLevel=1
+notify = false
+allowableThreads = 32
 J = apply(1..2*g+1, l ->
-    elapsedTime ideal sectionRing(pt, l, "ReduceDegrees" => true, DegreeLimit => 30));
+    elapsedTime ideal sectionRing(pt, l, "ReduceDegrees" => true, DegreeLimit => limit l));
+
+hf = hilbertFunction quotient J#0
+SG = numericalSemigroupGenerators hf
+gaps SG
+assert( genus SG == g )
+apply(15, hf)
 
 p2 = apply(J, async minimalBetti);
 netList toList p2

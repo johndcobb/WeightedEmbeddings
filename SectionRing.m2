@@ -323,12 +323,37 @@ sectionRing Ideal := o -> I -> (
 degreesRing' = memoize((rk, degs) -> ZZ( monoid [ Variables => #degs, DegreeRank => rk, Degrees => degs ] ))
 exponents Matrix := m -> apply(numcols m, c -> first exponents m_(0,c))
 
+remainderp = (m, G) -> (
+    -- TODO: does reversing or shuffling help equalize the buckets?
+    -- L := pack(allowableThreads, shuffle toList(0..numcols m-1));
+    -- matrix { await apply(L, async(cols -> m_cols % G)) })
+    matrix { select(await apply(numcols m, async(c -> m_{c} % G)), not zero) })
+
+-- TODO: handle towers
+quotientf = (g, f, d) -> (
+    g' := lift(g, ambient ring g);
+    f' := lift(f, ambient ring f);
+    -- K' := quotient(ideal ring g + ideal g'^d, ideal f'^d, Strategy => Quotient);
+    K' := syz(f'^d | g'^d | gens ideal ring g, SyzygyRows => 1);
+    K'  = trim ideal remainderp(K', gb ideal ring g);
+    promote(K', ring g))
+
 -- TODO: add to Saturation
-quotientd = (I, J, d) -> fold((A,B) -> elapsedTime quotient(A, B), I, d:J)
+quotientd = (I, J, d) -> (
+    if all(J_*, f -> #terms f == 1)
+    -- TODO: add this as the Linear strategy; gives a ~10x speed up in some examples!
+    then intersect apply(J_*, f -> elapsedTime quotientf(I, f, d))
+    else fold((A, B) -> elapsedTime quotient(A, B), ideal I^d, d:J))
 -- TODO: understand how this is related to local coordinates
 -- TODO: note that quotient isn't cached because ideal I_0^deg is a new ideal
-sections = (deg, I) -> I.cache.sections#deg ??= basis(deg, quotientd(ideal I_0^deg, I, deg))
+sections = (deg, I) -> I.cache.sections#deg ??= basis(deg, quotientd(I_0, I, deg))
 -- not quite useful, but we have: S/(I:f) -> S/I -> S/(I+f)
+
+///
+K = elapsedTime ideal mingens ideal syz(matrix { {S_0} | I_* }, SyzygyRows => 1);
+K = elapsedTime ideal mingens intersect(K, ideal syz(matrix { {J_1} | I_* }, SyzygyRows => 1));
+K = elapsedTime ideal mingens intersect(K, ideal syz(matrix { {J_0} | I_* }, SyzygyRows => 1));
+///
 
 sectionRing CoherentSheaf      := o ->  L -> sectionRing(L, 1, o)
 sectionRing(CoherentSheaf, ZZ) := o -> (L, p) -> (
@@ -415,10 +440,12 @@ sectionRing(Ideal, ZZ) := o -> (I, p) -> I.cache#(symbol sectionRing, p, o) ??= 
     s := symbol s;
     r := gcd flatten degrees source L // gcd degs;
     T := K(monoid[ s_0 .. s_(#degs - 1), Degrees => degs ]);
-    T / ker map(R, T, L, DegreeMap => a -> r * a) -- 10%
+    f := map(R, T, L, DegreeMap => a -> r * a);
+    assert isHomogeneous f;
+    T / ker f -- 10%
 )
 
-sections' = (X, deg, I) -> X.cache.sections#(deg, I) ??= basis(deg, quotientd(ideal I_0^deg, I, deg))
+sections' = (X, deg, I) -> X.cache.sections#(deg, I) ??= basis(deg, quotientd(I_0, I, deg))
 
 sectionRing(ProjectiveVariety, List, List) := o -> (X, II, pp) -> (
     R := ring X;
@@ -468,7 +495,9 @@ sectionRing(ProjectiveVariety, List, List) := o -> (X, II, pp) -> (
     s := symbol s;
     r := gcd flatten degrees source L // gcd degs;
     T := K(monoid[ s_0 .. s_(#degs - 1), Degrees => degs ]);
-    T / ker map(R, T, L, DegreeMap => a -> r * a) -- 10%
+    f := map(R, T, L, DegreeMap => a -> r * a);
+    assert isHomogeneous f;
+    T / ker f -- 10%
 )
 
 -----------------------------------------------------------------------
